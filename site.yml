@@ -1,0 +1,7 @@
+- name: An example deployment
+  hosts: localhost
+  become: no
+  gather_facts: true
+  roles:
+  tasks:
+    - debug: msg="Oh, hello, did it work?"

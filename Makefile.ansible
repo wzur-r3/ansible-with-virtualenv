@@ -1,0 +1,35 @@
+# make sure this Makefile is configurable a little bit
+# the location of the Python's virtual environment with Ansible installation
+ANSIBLE_DIR = ansible
+# the location of the Ansible roles, should match the ansible.cfg configuration
+ROLES_DIR = roles
+
+all: ansible roles
+
+# manage the virtualenv folder
+ansible: $(ANSIBLE_DIR)/bin/activate
+$(ANSIBLE_DIR)/bin/activate: requirements-lock.txt
+	@echo "Create / update the Python virtualenv in '$(ANSIBLE_DIR)' folder for this project"
+	@test -d $(ANSIBLE_DIR) || virtualenv $(ANSIBLE_DIR)
+	@$(ANSIBLE_DIR)/bin/pip install -U pip
+	@$(ANSIBLE_DIR)/bin/pip install -r requirements-lock.txt
+	@touch $(ANSIBLE_DIR)/bin/activate
+
+lock-python-requirements:
+	@echo "Create / update the Python requirements.txt for this project"
+	@test -d $(ANSIBLE_DIR) || virtualenv $(ANSIBLE_DIR)
+	@$(ANSIBLE_DIR)/bin/pip install -U pip
+	@$(ANSIBLE_DIR)/bin/pip install -r requirements.txt
+	@$(ANSIBLE_DIR)/bin/pip freeze | grep -v pkg-resources > requirements-lock.txt
+	@git add requirements-lock.txt
+	@touch $(ANSIBLE_DIR)/bin/activate
+
+# manage the external Ansible roles
+roles: $(ROLES_DIR)/.updated
+$(ROLES_DIR)/.updated: roles.yml
+	@echo "Create / update the local Ansible roles in '$(ROLES_DIR)' folder"
+	@test -d $(ROLES_DIR) || mkdir -p $(ROLES_DIR)
+	@$(ANSIBLE_DIR)/bin/ansible-galaxy install -r roles.yml
+	@touch $(ROLES_DIR)/.updated
+
+.PHONY: all ansible roles update-python-requirements

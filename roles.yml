@@ -1,0 +1,6 @@
+- src: ansiblebit.oracle-java
+- src: angstwad.docker_ubuntu
+- src: Datadog.datadog
+- src: git@github.com:corda/ansible-r3-roles.git
+  scm: git
+  version: master
